@@ -1,0 +1,49 @@
+/* Main background and text color */
+.stApp {
+    background-color: #0e1117;
+    color: #fafafa;
+}
+
+/* Sidebar styling */
+[data-testid="stSidebar"] {
+    background-color: #262730;
+}
+
+/* Card-like styling for metrics */
+div[data-testid="metric-container"] {
+    background-color: #1f2937;
+    border: 1px solid #374151;
+    padding: 15px;
+    border-radius: 10px;
+    color: white;
+}
+
+/* Custom headers */
+h1, h2, h3 {
+    font-family: 'Inter', sans-serif;
+    color: #ffffff;
+}
+
+/* News card styling */
+.news-card {
+    background-color: #1f2937;
+    padding: 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #374151;
+}
+
+.news-card h4 {
+    margin-top: 0;
+    color: #60a5fa;
+}
+
+.news-card a {
+    text-decoration: none;
+    color: #60a5fa;
+}
+
+.news-card .date {
+    font-size: 0.8em;
+    color: #9ca3af;
+}
