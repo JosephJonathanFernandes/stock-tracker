@@ -1,6 +1,6 @@
 # Professional Stock Tracker
 
-A comprehensive R Shiny application for stock market analysis with real-time data visualization, news integration, and advanced analytics capabilities.
+A comprehensive R Shiny application for stock market analysis with real-time data visualization, news integration, and advanced analytics capabilities including **Linear Regression Analysis**.
 
 ## 🚀 Features
 
@@ -10,6 +10,16 @@ A comprehensive R Shiny application for stock market analysis with real-time dat
 - **Market News Integration**: Latest financial news through SerpAPI integration
 - **Industry Analysis**: Sector-wise performance visualization
 - **Performance Metrics**: Track application usage and performance
+
+### 📊 **NEW: Linear Regression Analysis**
+- **Multiple Regression Models**: Simple linear, log-linear, polynomial, and multiple regression
+- **Price Prediction**: 30-90 day stock price forecasting with confidence intervals
+- **Trend Analysis**: Automatic trend direction detection and strength measurement
+- **Model Comparison**: Compare different regression models (R², AIC, RMSE)
+- **Moving Averages**: 7-day and 20-day moving averages with regression overlay
+- **Support & Resistance**: Automated calculation of support and resistance levels
+- **Risk Assessment**: Volatility analysis and prediction uncertainty metrics
+- **Professional Reports**: Downloadable analysis reports in Markdown format
 
 ### Professional Features
 - **Configuration Management**: Centralized settings and environment configuration
@@ -37,9 +47,76 @@ install.packages(c(
   "testthat", "digest"
 ))
 
+# Statistical modeling packages (for regression analysis)
+install.packages(c("broom", "forecast", "zoo"))
+
 # Optional packages for extended functionality
 install.packages(c("httr", "jsonlite", "lubridate"))
 ```
+
+## 🎯 **Linear Regression Analysis Guide**
+
+### **Getting Started with Regression Analysis**
+
+1. **Navigate to Regression Tab**: Click "Regression Analysis" in the sidebar
+2. **Select Stock**: Choose a stock symbol from the dropdown
+3. **Set Forecast Period**: Specify days ahead to predict (1-90 days)
+4. **Run Analysis**: Click "Run Analysis" to generate predictions
+
+### **Understanding Regression Results**
+
+#### **Model Types Available**
+- **Simple Linear**: Basic price vs. time relationship
+- **Log-Linear**: Log-transformed prices for exponential trends
+- **Polynomial**: Captures curved price patterns
+- **Multiple Regression**: Uses moving averages and volatility
+
+#### **Key Metrics Explained**
+- **R-squared (R²)**: Model fit quality (0-1, higher = better)
+- **Adjusted R²**: R² adjusted for model complexity
+- **RMSE**: Average prediction error in currency units
+- **AIC**: Model selection criterion (lower = better)
+
+#### **Trend Analysis**
+- **Direction**: Upward 📈, Downward 📉, or Flat ➡️
+- **Strength**: Daily percentage change rate
+- **Confidence**: Model reliability assessment
+
+#### **Risk Assessment**
+- **Price Volatility**: Historical price variation percentage
+- **Prediction Uncertainty**: Forecast confidence range
+- **Risk Level**: Low 🟢, Medium 🟡, High 🔴
+
+### **Interpreting Charts**
+
+#### **Price Analysis Chart Features**
+- **Blue Line**: Historical closing prices
+- **Orange/Pink Lines**: 7-day and 20-day moving averages
+- **Golden Dotted Line**: Regression trend line
+- **Red Line with Dots**: Price predictions
+- **Red Shaded Area**: Confidence intervals
+
+#### **Reading Predictions**
+- **Point Forecast**: Most likely price
+- **Upper/Lower Bounds**: 95% confidence interval
+- **Confidence Range**: Prediction uncertainty span
+
+### **Best Practices**
+
+#### **Model Selection**
+- **R² > 0.7**: Strong predictive power ✅
+- **R² 0.4-0.7**: Moderate reliability ⚠️
+- **R² < 0.4**: Weak prediction, use caution ❌
+
+#### **Investment Insights**
+- **Positive Trend + High R²**: Potential buying opportunity
+- **Negative Trend + High R²**: Consider selling or shorting
+- **Low R² Models**: Market uncertainty, diversify risk
+
+#### **Risk Management**
+- **High Volatility**: Use tighter stop-losses
+- **Wide Confidence Intervals**: Reduce position size
+- **Model Disagreement**: Wait for clearer signals
 
 ## 🔧 Installation
 

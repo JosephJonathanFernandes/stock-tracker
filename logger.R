@@ -47,6 +47,18 @@ log_startup <- function() {
   flog.info("========================================")
 }
 
+#' General info logging wrapper
+#'
+#' @param msg Message to log at INFO level
+log_info <- function(msg) {
+  tryCatch({
+    flog.info(msg)
+  }, error = function(e) {
+    # Fallback to console if logging fails
+    message(paste("INFO:", msg))
+  })
+}
+
 #' Log data loading events
 #' 
 #' @param file_name Name of the file being loaded

@@ -21,11 +21,15 @@ data_packages <- c(
   "lubridate"
 )
 
+# Professional features packages
 professional_packages <- c(
   "futile.logger",
   "testthat",
   "digest",
-  "config"
+  "config",
+  "broom",        # For tidy statistical modeling
+  "forecast",     # For time series forecasting
+  "zoo"           # For rolling window calculations
 )
 
 optional_packages <- c(
@@ -36,6 +40,9 @@ optional_packages <- c(
   "htmlwidgets",
   "shinyWidgets"
 )
+
+# Combine all package lists
+required_packages <- c(core_packages, data_packages, professional_packages, optional_packages)
 
 # Function to install packages if they're not already installed
 install_if_missing <- function(packages) {

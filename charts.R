@@ -319,3 +319,187 @@ plot_correlation_heatmap <- function(df, symbols) {
   
   return(p)
 }
+
+#' Enhanced stock price plot with regression analysis
+#' 
+#' @param data Stock data
+#' @param symbol Stock symbol to plot
+#' @param regression_results Regression analysis results
+#' @param show_trend Whether to show trend lines
+#' @return Plotly chart with regression analysis
+plot_stock_price_with_regression <- function(data, symbol, regression_results, show_trend = TRUE) {
+  if (is.null(data) || nrow(data) == 0) {
+    return(plot_ly() %>% 
+      add_annotations(
+        text = "No data available",
+        xref = "paper", yref = "paper",
+        x = 0.5, y = 0.5, showarrow = FALSE,
+        font = list(color = "white")
+      ) %>%
+      layout(
+        plot_bgcolor = '#1f2937',
+        paper_bgcolor = '#1f2937'
+      ))
+  }
+  
+  # Main price line
+  p <- plot_ly(data, x = ~Date, y = ~Close, type = "scatter", mode = "lines",
+               name = "Close Price",
+               line = list(color = "#60a5fa", width = 3),
+               hovertemplate = "<b>Close Price</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>")
+  
+  # Add moving averages if data is sufficient
+  if (nrow(data) >= 7) {
+    data$ma_7 <- zoo::rollmean(data$Close, k = 7, fill = NA, align = "right")
+    p <- p %>% add_trace(
+      data = data,
+      x = ~Date, y = ~ma_7,
+      type = "scatter", mode = "lines",
+      name = "7-day MA",
+      line = list(color = "#FFA500", width = 1.5),
+      hovertemplate = "<b>7-day MA</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>"
+    )
+  }
+  
+  if (nrow(data) >= 20) {
+    data$ma_20 <- zoo::rollmean(data$Close, k = 20, fill = NA, align = "right")
+    p <- p %>% add_trace(
+      data = data,
+      x = ~Date, y = ~ma_20,
+      type = "scatter", mode = "lines",
+      name = "20-day MA",
+      line = list(color = "#FF69B4", width = 1.5),
+      hovertemplate = "<b>20-day MA</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>"
+    )
+  }
+  
+  # Add regression analysis if available and requested
+  if (!is.null(regression_results) && show_trend) {
+    # Add trend line
+    if (!is.null(regression_results$model_data)) {
+      # Ensure model data and fitted values are aligned to the same length
+      trend_data <- as.data.frame(regression_results$model_data)
+      fitted_values <- as.numeric(fitted(regression_results$model))
+      n_trend <- min(nrow(trend_data), length(fitted_values))
+      if (n_trend > 0) {
+        trend_df <- trend_data[seq_len(n_trend), , drop = FALSE]
+        trend_df$.fitted <- fitted_values[seq_len(n_trend)]
+
+        p <- p %>% add_trace(
+          data = trend_df,
+          x = ~Date, y = ~.fitted,
+          type = "scatter", mode = "lines",
+          name = paste("Trend Line (", regression_results$model_type, ")"),
+          line = list(color = "#FFD700", width = 2, dash = "dot"),
+          hovertemplate = "<b>Trend</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>"
+        )
+      }
+    }
+    
+    # Add predictions
+    if (!is.null(regression_results$predictions)) {
+      # Coerce to data.frame and ensure columns have compatible lengths
+      pred_data <- as.data.frame(regression_results$predictions)
+      if (nrow(pred_data) > 0) {
+        pred_data <- head(pred_data, 15)
+        required_cols <- c("Date", "predicted_price", "upper_bound", "lower_bound")
+        if (all(required_cols %in% colnames(pred_data))) {
+          # Trim to the minimum available length across required columns
+          lens <- sapply(pred_data[required_cols], length)
+          n_pred <- min(lens)
+          if (n_pred > 0) {
+            pred_data <- pred_data[seq_len(n_pred), , drop = FALSE]
+
+            p <- p %>% add_trace(
+              data = pred_data,
+              x = ~Date, y = ~predicted_price,
+              type = "scatter", mode = "lines+markers",
+              name = "Price Forecast",
+              line = list(color = "#FF6B6B", width = 2),
+              marker = list(size = 4, color = "#FF6B6B"),
+              hovertemplate = "<b>Forecast</b><br>Date: %{x}<br>Price: ₹%{y:.2f}<extra></extra>"
+            )
+
+            # Add confidence band traces (ensure same length)
+            p <- p %>% add_trace(
+              data = pred_data,
+              x = ~Date, y = ~upper_bound,
+              type = "scatter", mode = "lines",
+              name = "Upper Confidence",
+              line = list(color = "rgba(255, 107, 107, 0.3)", width = 1),
+              showlegend = FALSE,
+              hoverinfo = "skip"
+            ) %>% add_trace(
+              data = pred_data,
+              x = ~Date, y = ~lower_bound,
+              type = "scatter", mode = "lines",
+              name = "Lower Confidence", 
+              line = list(color = "rgba(255, 107, 107, 0.3)", width = 1),
+              fill = "tonexty", fillcolor = "rgba(255, 107, 107, 0.1)",
+              showlegend = FALSE,
+              hoverinfo = "skip"
+            )
+          }
+        }
+      }
+    }
+  }
+  
+  # Enhanced layout
+  title_text <- paste(symbol, "- Price Analysis with Regression")
+  if (!is.null(regression_results)) {
+    trend_dir <- regression_results$trend$direction
+    r_squared <- round(regression_results$trend$r_squared, 3)
+    title_text <- paste(title_text, "| Trend:", trend_dir, "| R² =", r_squared)
+  }
+  
+  p <- p %>%
+    layout(
+      title = list(text = title_text, 
+                   font = list(color = "white", size = 18)),
+      xaxis = list(
+        title = "Date", 
+        titlefont = list(color = '#ffffff'),
+        tickfont = list(color = '#ffffff'),
+        gridcolor = '#374151'
+      ),
+      yaxis = list(
+        title = "Price (₹)", 
+        titlefont = list(color = '#ffffff'),
+        tickfont = list(color = '#ffffff'),
+        gridcolor = '#374151'
+      ),
+      plot_bgcolor = '#1f2937',
+      paper_bgcolor = '#1f2937',
+      font = list(color = "white"),
+      showlegend = TRUE,
+      legend = list(
+        x = 0.02, y = 0.98,
+        bgcolor = "rgba(0,0,0,0.7)",
+        bordercolor = "white",
+        borderwidth = 1,
+        font = list(color = 'white')
+      ),
+      annotations = if (!is.null(regression_results)) {
+        list(
+          list(
+            text = paste(
+              "<b>Regression Analysis</b><br>",
+              "Model:", tools::toTitleCase(gsub("_", " ", regression_results$model_type)), "<br>",
+              "30-day forecast:", regression_results$metrics$expected_return_percent, "% return<br>",
+              "Risk level:", if (regression_results$metrics$price_volatility_percent < 3) "Low" else if (regression_results$metrics$price_volatility_percent < 7) "Medium" else "High"
+            ),
+            xref = "paper", yref = "paper",
+            x = 0.98, y = 0.98, xanchor = "right", yanchor = "top",
+            showarrow = FALSE,
+            font = list(color = "white", size = 11),
+            bgcolor = "rgba(0,0,0,0.8)",
+            bordercolor = "white",
+            borderwidth = 1
+          )
+        )
+      } else NULL
+    )
+  
+  return(p)
+}
